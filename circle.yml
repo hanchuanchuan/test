@@ -7,9 +7,6 @@ general:
 
 jobs:
   build:
-    branches:
-      ignore: gh-pages
-
     docker:
       - image: circleci/golang:1.12
       - image: circleci/mysql:5.7
