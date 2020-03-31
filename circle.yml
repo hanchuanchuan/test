@@ -14,7 +14,7 @@ jobs:
         environment:
           - MYSQL_ALLOW_EMPTY_PASSWORD=true
 
-    working_directory: /go/src/github.com/hanchuanchuan/goInception
+    working_directory: /go/src/github.com/hanchuanchuan/test
 
     steps:
       - run:
@@ -23,16 +23,16 @@ jobs:
 
   publish-github-release:
     environment:
-      ARTIFACTS: /go/src/github.com/hanchuanchuan/goInception/release
+      ARTIFACTS: /go/src/github.com/hanchuanchuan/test/release
     docker:
     - image: cibuilds/github:0.10
     steps:
     - attach_workspace:
-        at: /go/src/github.com/hanchuanchuan/goInception/release
+        at: /go/src/github.com/hanchuanchuan/test/release
     - run:
         name: "Publish Release on GitHub"
         command: |
-          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r goInceptionTest -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
 
 
 workflows:
