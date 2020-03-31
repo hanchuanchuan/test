@@ -1,4 +1,4 @@
-PROJECT=tidb
+PROJECT=test
 GOPATH ?= $(shell go env GOPATH)
 
 # Ensure GOPATH is set before running build process.
@@ -37,13 +37,13 @@ FILES     := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go" | grep -vE "vendor"
 GOFAIL_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|vendor)" | xargs gofail enable)
 GOFAIL_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|vendor)" | xargs gofail disable)
 
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/mysql.TiDBReleaseVersion=$(shell git describe --tags --dirty)"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBBuildTS=$(shell date '+%Y-%m-%d %H:%M:%S')"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.TiDBGitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
-LDFLAGS += -X "github.com/hanchuanchuan/goInception/util/printer.GoVersion=$(shell go version)"
+LDFLAGS += -X "github.com/hanchuanchuan/test/mysql.TiDBReleaseVersion=$(shell git describe --tags --dirty)"
+LDFLAGS += -X "github.com/hanchuanchuan/test/util/printer.TiDBBuildTS=$(shell date '+%Y-%m-%d %H:%M:%S')"
+LDFLAGS += -X "github.com/hanchuanchuan/test/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)"
+LDFLAGS += -X "github.com/hanchuanchuan/test/util/printer.TiDBGitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
+LDFLAGS += -X "github.com/hanchuanchuan/test/util/printer.GoVersion=$(shell go version)"
 
-TEST_LDFLAGS =  -X "github.com/hanchuanchuan/goInception/config.checkBeforeDropLDFlag=1"
+TEST_LDFLAGS =  -X "github.com/hanchuanchuan/test/config.checkBeforeDropLDFlag=1"
 
 CHECK_LDFLAGS += $(LDFLAGS) ${TEST_LDFLAGS}
 
@@ -142,7 +142,7 @@ todo:
 test: checklist gotest explaintest
 
 explaintest: server
-	@cd cmd/explaintest && ./run-tests.sh -s ../../bin/goInception
+	@cd cmd/explaintest && ./run-tests.sh -s ../../bin/test
 
 gotest: parserlib
 	$(GO) get github.com/etcd-io/gofail@v0.0.0-20180808172546-51ce9a71510a
@@ -152,10 +152,10 @@ ifeq ("$(TRAVIS_COVERAGE)", "1")
 	@export log_level=error; \
 	go get github.com/go-playground/overalls
 	# go get github.com/mattn/goveralls
-	# $(OVERALLS) -project=github.com/hanchuanchuan/goInception -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' || { $(GOFAIL_DISABLE); exit 1; }
+	# $(OVERALLS) -project=github.com/hanchuanchuan/test -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' || { $(GOFAIL_DISABLE); exit 1; }
 	# $(GOVERALLS) -service=travis-ci -coverprofile=overalls.coverprofile || { $(GOFAIL_DISABLE); exit 1; }
 
-	$(OVERALLS) -project=github.com/hanchuanchuan/goInception -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' -concurrency=1 -- -short || { $(GOFAIL_DISABLE); exit 1; }
+	$(OVERALLS) -project=github.com/hanchuanchuan/test -covermode=count -ignore='.git,vendor,cmd,docs,LICENSES' -concurrency=1 -- -short || { $(GOFAIL_DISABLE); exit 1; }
 else
 	@echo "Running in native mode."
 	@export log_level=error; \
@@ -196,14 +196,14 @@ endif
 
 server: parserlib
 ifeq ($(TARGET), "")
-	$(GOBUILD) $(RACE_FLAG) -ldflags '$(LDFLAGS) $(CHECK_FLAG)' -o bin/goInception tidb-server/main.go
+	$(GOBUILD) $(RACE_FLAG) -ldflags '$(LDFLAGS) $(CHECK_FLAG)' -o bin/test tidb-server/main.go
 else
 	$(GOBUILD) $(RACE_FLAG) -ldflags '$(LDFLAGS) $(CHECK_FLAG)' -o '$(TARGET)' tidb-server/main.go
 endif
 
 server_check: parserlib
 ifeq ($(TARGET), "")
-	$(GOBUILD) $(RACE_FLAG) -ldflags '$(CHECK_LDFLAGS)' -o bin/goInception tidb-server/main.go
+	$(GOBUILD) $(RACE_FLAG) -ldflags '$(CHECK_LDFLAGS)' -o bin/test tidb-server/main.go
 else
 	$(GOBUILD) $(RACE_FLAG) -ldflags '$(CHECK_LDFLAGS)' -o '$(TARGET)' tidb-server/main.go
 endif
@@ -258,9 +258,9 @@ release:
 	@for GOOS in darwin linux; do \
 		for GOARCH in amd64; do \
 			echo "Building $${GOOS}-$${GOARCH} ..."; \
-			GOOS=$${GOOS} GOARCH=amd64 $(GOBUILD) -ldflags '-s -w $(LDFLAGS)'  -o goInception tidb-server/main.go; \
-			tar -czf release/goInception-$${GOOS}-amd64-${VERSION}.tar.gz goInception config/config.toml.default; \
-			rm -f goInception; \
+			GOOS=$${GOOS} GOARCH=amd64 $(GOBUILD) -ldflags '-s -w $(LDFLAGS)'  -o test tidb-server/main.go; \
+			tar -czf release/test-$${GOOS}-amd64-${VERSION}.tar.gz test config/config.toml.default; \
+			rm -f test; \
 		done ;\
 	done
 
@@ -271,10 +271,10 @@ docker:
 	@if [ ! -f bin/pt-online-schema-change ];then \
 		wget -O bin/pt-online-schema-change percona.com/get/pt-online-schema-change; \
 	fi
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-s -w $(LDFLAGS)' -o bin/goInception tidb-server/main.go
-	v1=$(shell git tag | awk -F'-' '{print $1}' |tail -1) && docker build -t hanchuanchuan/goinception:$${v1} . \
-	&& docker tag hanchuanchuan/goinception:$${v1} hanchuanchuan/goinception:latest
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-s -w $(LDFLAGS)' -o bin/test tidb-server/main.go
+	v1=$(shell git tag | awk -F'-' '{print $1}' |tail -1) && docker build -t hanchuanchuan/test:$${v1} . \
+	&& docker tag hanchuanchuan/test:$${v1} hanchuanchuan/test:latest
 
 docker-push:
-	v1=$(shell git tag|tail -1) && docker push hanchuanchuan/goinception:$${v1} \
-	&& docker push hanchuanchuan/goinception:latest
+	v1=$(shell git tag|tail -1) && docker push hanchuanchuan/test:$${v1} \
+	&& docker push hanchuanchuan/test:latest

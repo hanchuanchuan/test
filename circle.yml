@@ -18,6 +18,10 @@ jobs:
 
     steps:
       - run:
+          name: "ls"
+          command: ls -l
+
+      - run:
           name: "Make Release"
           command: make release
 
