@@ -21,39 +21,35 @@ jobs:
 
     steps:
       - run:
-          name: Install mysql-client
-          command: sudo apt install default-mysql-client
-      - checkout
-      - run:
-          name: Waiting for MySQL to be ready
-          command: |
-            for i in `seq 1 10`;
-            do
-              nc -z localhost 3306 && echo Success && exit 0
-              echo -n .
-              sleep 1
-            done
-            echo Failed waiting for MySQL && exit 1
-      - run:
-          name: mysql init
-          command: mysql -h 127.0.0.1 -u root -e "select version();create database if not exists test DEFAULT CHARACTER SET utf8;create database if not exists test_inc DEFAULT CHARACTER SET utf8;grant all on *.* to test@'127.0.0.1' identified by 'test';FLUSH PRIVILEGES;show databases;show variables like 'explicit_defaults_for_timestamp';"
-      - run: rm -f go.sum
-      - run: sudo wget -O /usr/local/bin/pt-online-schema-change percona.com/get/pt-online-schema-change
-      - run: sudo chmod +x /usr/local/bin/pt-online-schema-change
-      - run: sudo chmod +x cmd/explaintest/run-tests.sh
-      - run:
-          name: "Build & Test"
-          command: make dev
-          no_output_timeout: 1200
+          name: "Make Release"
+          command: make release
 
-      - setup_remote_docker:
-          docker_layer_caching: false
-      - run:
-          name: Publish Docker Image to Docker Hub
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              echo "$DOCKERHUB_USERNAME"
-              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-              make docker
-              make docker-push
-            fi
+  publish-github-release:
+    environment:
+      ARTIFACTS: /go/src/github.com/hanchuanchuan/goInception/release
+    docker:
+    - image: cibuilds/github:0.10
+    steps:
+    - attach_workspace:
+        at: /go/src/github.com/hanchuanchuan/goInception/release
+    - run:
+        name: "Publish Release on GitHub"
+        command: |
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r goInceptionTest -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
+
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: gh-pages
+      - publish-github-release:
+          requires:
+            - build
+          filters:
+            branches: master
+            tags:
+              only: /^[Vv]\d+\.\d+\.\d+$/
