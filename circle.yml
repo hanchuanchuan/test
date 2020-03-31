@@ -50,6 +50,7 @@ workflows:
           requires:
             - build
           filters:
-            branches: master
+            branches:
+              only: master
             tags:
               only: /^[Vv]\d+\.\d+\.\d+$/
