@@ -20,9 +20,6 @@ jobs:
 
     working_directory: /go/src/github.com/hanchuanchuan/test
 
-    environment:
-      GIT_COMMIT_DESC: $(git log --format=oneline -n 1 $CIRCLE_SHA1)
-
     steps:
       - checkout
       - run: rm -f go.sum
@@ -39,6 +36,7 @@ jobs:
       - run:
           name: Publish Release on GitHub
           command: |
+            GIT_COMMIT_DESC=$(git log --format=oneline -n 1 $CIRCLE_SHA1)
             echo 'commit message:' "$GIT_COMMIT_DESC"
             if [[ "$GIT_COMMIT_DESC" == v.* ]] || [[ "$GIT_COMMIT_DESC" == Merge* ]]; then
                 echo "Publish Release on GitHub"
