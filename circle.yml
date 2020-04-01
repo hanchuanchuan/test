@@ -32,14 +32,25 @@ jobs:
           name: "ls"
           command: ls -l release
 
+      - install-ghr
 
       - run:
           name: Publish Release on GitHub
           command: |
-            if [ -n "${GITHUB_TOKEN}" ]; then
-              go get github.com/tcnksm/ghr
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
+            if [ -z "$CIRCLE_TAG" ]; then
+              CIRCLE_TAG=$(git describe --tags)
             fi
+            if [ -n "${CIRCLE_TAG}" ]; then
+              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -replace -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
+            fi
+
+      # - run:
+      #     name: Publish Release on GitHub
+      #     command: |
+      #       if [ -n "${GITHUB_TOKEN}" ]; then
+      #         go get github.com/tcnksm/ghr
+      #         ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
+      #       fi
 
 
   # publish-github-release:
