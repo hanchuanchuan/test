@@ -47,7 +47,7 @@ jobs:
 
                 if [ -n "${CIRCLE_TAG}" ]; then
                   go get github.com/tcnksm/ghr
-                  ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -replace -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
+                  ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -replace -c ${CIRCLE_SHA1} -b "### $GIT_COMMIT_DESC" ${CIRCLE_TAG} ./release
                 else
                   echo '无效$CIRCLE_TAG！'
                 fi
