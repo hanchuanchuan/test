@@ -14,9 +14,10 @@ jobs:
         environment:
           - MYSQL_ALLOW_EMPTY_PASSWORD=true
 
-    working_directory: /go/src/github.com/hanchuanchuan/goInception
+    working_directory: /go/src/github.com/hanchuanchuan/test
 
     steps:
+      - checkout
       - run:
           name: "ls"
           command: ls -l
@@ -27,12 +28,12 @@ jobs:
 
   publish-github-release:
     environment:
-      ARTIFACTS: /go/src/github.com/hanchuanchuan/goInception/release
+      ARTIFACTS: /go/src/github.com/hanchuanchuan/test/release
     docker:
     - image: cibuilds/github:0.10
     steps:
     - attach_workspace:
-        at: /go/src/github.com/hanchuanchuan/goInception/release
+        at: /go/src/github.com/hanchuanchuan/test/release
     - run:
         name: "Publish Release on GitHub"
         command: |
