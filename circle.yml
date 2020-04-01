@@ -24,9 +24,9 @@ jobs:
       - checkout
       - run: rm -f go.sum
 
-      # - run:
-      #     name: "Make Release"
-      #     command: make release
+      - run:
+          name: "Make Release"
+          command: make release
 
       - run:
           name: "ls"
@@ -37,7 +37,6 @@ jobs:
           name: Publish Release on GitHub
           command: |
             if [ -n "${GITHUB_TOKEN}" ]; then
-              make release
               go get github.com/tcnksm/ghr
               ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} v1.0.1 $ARTIFACTS
             fi
