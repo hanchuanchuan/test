@@ -14,7 +14,7 @@ export PATH := $(path_to_add):$(PATH)
 GO        := GO111MODULE=on go
 GOBUILD   := CGO_ENABLED=0 $(GO) build $(BUILD_FLAG)
 
-VERSION := $(shell git describe --tags --dirty)
+VERSION := $(shell git describe --tags)
 
 # 指定部分单元测试跳过
 ifeq ("$(SHORT)", "1")
