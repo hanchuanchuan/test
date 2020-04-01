@@ -43,7 +43,7 @@ jobs:
                 echo "Publish Release on GitHub"
 
                 if [ -z "$CIRCLE_TAG" ]; then
-                  CIRCLE_TAG=$(git describe --tags)
+                  CIRCLE_TAG="v2.0.1"
                 fi
                 if [ -n "${CIRCLE_TAG}" ]; then
                   go get github.com/tcnksm/ghr
@@ -77,21 +77,3 @@ jobs:
   #       command: |
   #         go get github.com/tcnksm/ghr
   #         ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
-
-
-# workflows:
-#   version: 2
-#   main:
-#     jobs:
-#       - build:
-#           filters:
-#             branches:
-#               ignore: gh-pages
-#       - publish-github-release:
-#           requires:
-#             - build
-#           filters:
-#             branches:
-#               only: master
-#             tags:
-#               only: /^[Vv]\d+\.\d+\.\d+$/
