@@ -9,6 +9,7 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.12
+      - image: cibuilds/github:0.10
       - image: circleci/mysql:5.7
         command: mysqld --lower_case_table_names=1 --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --innodb-large-prefix=true --log-bin=on --server_id=111
         environment:
@@ -20,30 +21,45 @@ jobs:
       - checkout
       - run: rm -f go.sum
 
-      - run:
-          name: "Make Release"
-          command: make release
+      # - run:
+      #     name: "Make Release"
+      #     command: make release
 
       - run:
           name: "ls"
           command: ls -l release
 
-  publish-github-release:
-    environment:
-      ARTIFACTS: /go/src/github.com/hanchuanchuan/test/release
-    docker:
-    - image: cibuilds/github:0.10
-    steps:
-    - attach_workspace:
-        at: /go/src/github.com/hanchuanchuan/test/release
-    - run: ls -l
-    - run: pwd
-    - run: ls -l /go/src/github.com/hanchuanchuan/goInception/
-    - run: ls -l /go/src/github.com/hanchuanchuan/goInception/release
-    - run:
+      - run:
         name: "Publish Release on GitHub"
         command: |
-          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
+            make release
+            go get github.com/tcnksm/ghr
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} v1.0.1 $ARTIFACTS
+        # command: |
+        #     if [ -n "${CIRCLE_TAG}" ]; then
+        #       make release
+        #       go get github.com/tcnksm/ghr
+        #       ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
+        #     fi
+
+
+  # publish-github-release:
+  #   environment:
+  #     ARTIFACTS: /go/src/github.com/hanchuanchuan/test/release
+  #   docker:
+  #   - image: cibuilds/github:0.10
+  #   steps:
+  #   - attach_workspace:
+  #       at: /go/src/github.com/hanchuanchuan/test/release
+  #   - run: ls -l
+  #   - run: pwd
+  #   - run: ls -l /go/src/github.com/hanchuanchuan/goInception/
+  #   - run: ls -l /go/src/github.com/hanchuanchuan/goInception/release
+  #   - run:
+  #       name: "Publish Release on GitHub"
+  #       command: |
+  #         go get github.com/tcnksm/ghr
+  #         ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
 
 
 workflows:
