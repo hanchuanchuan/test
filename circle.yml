@@ -36,7 +36,7 @@ jobs:
       - run:
           name: Publish Release on GitHub
           command: |
-            GIT_COMMIT_DESC=$(git log --format=oneline -n 1 $CIRCLE_SHA1)
+            GIT_COMMIT_DESC=$(git log --format=oneline -n 1 ${CIRCLE_SHA1} | sed -E 's/^[^ ]+ (.*)$/\1/g')
             echo 'commit message:' "$GIT_COMMIT_DESC"
             if [[ "$GIT_COMMIT_DESC" == v.* ]] || [[ "$GIT_COMMIT_DESC" == Merge* ]]; then
                 echo "Publish Release on GitHub"
