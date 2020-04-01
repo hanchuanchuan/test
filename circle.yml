@@ -18,13 +18,15 @@ jobs:
 
     steps:
       - checkout
-      - run:
-          name: "ls"
-          command: ls -l
+      - run: rm -f go.sum
 
       - run:
           name: "Make Release"
           command: make release
+
+      - run:
+          name: "ls"
+          command: ls -l release
 
   publish-github-release:
     environment:
