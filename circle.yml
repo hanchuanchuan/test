@@ -38,7 +38,7 @@ jobs:
           command: |
             if [ -n "${GITHUB_TOKEN}" ]; then
               go get github.com/tcnksm/ghr
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} v1.0.1 $ARTIFACTS
+              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
             fi
 
 
