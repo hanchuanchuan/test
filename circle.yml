@@ -42,12 +42,12 @@ jobs:
             if [[ "$GIT_COMMIT_DESC" =~ ^[vV][0123456789]+\.[0123456789]+.* ]] || [[ "$GIT_COMMIT_DESC" == ^[mM]erge* ]]; then
                 echo "Publish Release on GitHub"
 
-                if [ -z "$CIRCLE_TAG" ]; then
-                  CIRCLE_TAG="v2.0.1"
-                fi
+
+                CIRCLE_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+
                 if [ -n "${CIRCLE_TAG}" ]; then
                   go get github.com/tcnksm/ghr
-                  ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -replace -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
+                  ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -delete -replace -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
                 else
                   echo '无效$CIRCLE_TAG！'
                 fi
