@@ -34,6 +34,9 @@ jobs:
     steps:
     - attach_workspace:
         at: /go/src/github.com/hanchuanchuan/test/release
+    - run: ls -l
+    - run: ls -l /go/src/github.com/hanchuanchuan/goInception/
+    - run: ls -l /go/src/github.com/hanchuanchuan/goInception/release
     - run:
         name: "Publish Release on GitHub"
         command: |
