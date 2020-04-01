@@ -7,6 +7,9 @@ general:
 
 jobs:
   build:
+    branches:
+      ignore: gh-pages
+
     docker:
       - image: circleci/golang:1.12
       - image: cibuilds/github:0.10
@@ -59,19 +62,19 @@ jobs:
   #         ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -c ${CIRCLE_SHA1} ${CIRCLE_TAG} $ARTIFACTS
 
 
-workflows:
-  version: 2
-  main:
-    jobs:
-      - build:
-          filters:
-            branches:
-              ignore: gh-pages
-      - publish-github-release:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /^[Vv]\d+\.\d+\.\d+$/
+# workflows:
+#   version: 2
+#   main:
+#     jobs:
+#       - build:
+#           filters:
+#             branches:
+#               ignore: gh-pages
+#       - publish-github-release:
+#           requires:
+#             - build
+#           filters:
+#             branches:
+#               only: master
+#             tags:
+#               only: /^[Vv]\d+\.\d+\.\d+$/
