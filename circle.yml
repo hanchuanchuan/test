@@ -20,6 +20,9 @@ jobs:
 
     working_directory: /go/src/github.com/hanchuanchuan/test
 
+    environment:
+      GIT_COMMIT_DESC: git log --format=oneline -n 1 $CIRCLE_SHA1
+
     steps:
       - checkout
       - run: rm -f go.sum
@@ -36,16 +39,27 @@ jobs:
       - run:
           name: Publish Release on GitHub
           command: |
-            if [ -z "$CIRCLE_TAG" ]; then
-              CIRCLE_TAG=$(git describe --tags)
-            fi
-            if [ -n "${CIRCLE_TAG}" ]; then
-              go get github.com/tcnksm/ghr
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -replace -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
+            echo 'commit message:' "$GIT_COMMIT_DESC"
+            if [[ "$GIT_COMMIT_DESC" == v.* ]] || [[ "$GIT_COMMIT_DESC" == Merge* ]]; then
+                echo "Publish Release on GitHub"
+
+                if [ -z "$CIRCLE_TAG" ]; then
+                  CIRCLE_TAG=$(git describe --tags)
+                fi
+                if [ -n "${CIRCLE_TAG}" ]; then
+                  go get github.com/tcnksm/ghr
+                  ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r test -replace -c ${CIRCLE_SHA1} ${CIRCLE_TAG} ./release
+                else
+                  echo '无效$CIRCLE_TAG！'
+                fi
             else
-              echo '无效$CIRCLE_TAG！'
+              echo "不符合发版格式，跳过Release！！！"
             fi
 
+
+# git log -1 --pretty=%B ${CIRCLE_SHA1}
+# git log --format=oneline -n 1 ${CIRCLE_SHA1}
+# export GIT_COMMIT_DESC=$(git log --format=oneline -n 1 | sed -E 's/^[^ ]+ (.*)$/\1/g')
 
   # publish-github-release:
   #   environment:
